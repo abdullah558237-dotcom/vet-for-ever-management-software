@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Invoice: {{ patient.name }} | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-9">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                <div>
+                    <h4 class="fw-bold text-primary mb-0"><i class="bi bi-receipt me-2"></i> Create Invoice</h4>
+                    <small class="text-muted">Patient: <strong>{{ patient.name }}</strong> &bull; Owner: <strong>{{ patient.owner.get_full_name }}</strong></small>
+                </div>
+                <a href="{% url 'invoice_list' %}" class="btn btn-outline-secondary btn-sm rounded-3">Cancel</a>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <h5 class="fw-bold text-secondary mb-3">Itemized Charges</h5>
+                {{ formset.management_form }}
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light small">
+                            <tr>
+                                <th>Category</th>
+                                <th>Item / Service Description</th>
+                                <th style="width: 90px;">Qty</th>
+                                <th style="width: 140px;">Price (Rs.)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item_form in formset %}
+                            <tr>
+                                <td>{{ item_form.item_type }}{{ item_form.id }}</td>
+                                <td>{{ item_form.description }}</td>
+                                <td>{{ item_form.quantity }}</td>
+                                <td>{{ item_form.unit_price }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row g-3 bg-light p-3 rounded-3 mb-4">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-semibold">Discount (Rs.)</label>
+                        {{ form.discount }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-semibold">Paid Amount (Rs.)</label>
+                        {{ form.paid_amount }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-semibold">Payment Method</label>
+                        {{ form.payment_method }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Remarks / Payment Notes</label>
+                        {{ form.notes }}
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3 shadow-sm">
+                        <i class="bi bi-check-circle me-1"></i> Generate Invoice & Record Charges
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

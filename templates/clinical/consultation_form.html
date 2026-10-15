@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Examination Room: {{ patient.name }} | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+        <!-- Patient Banner -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center fw-bold fs-3" style="width: 55px; height: 55px;">
+                        {{ patient.name|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0 text-dark">{{ patient.name }}</h4>
+                        <div class="text-muted small">
+                            {{ patient.get_species_display }} &bull; {{ patient.breed|default:"Mixed" }} &bull; Age: {{ patient.age_display }}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-light text-dark border"><i class="bi bi-person me-1"></i> Owner: {{ patient.owner.get_full_name }}</span>
+                    {% if last_consult and last_consult.weight_kg %}
+                        <div class="small text-muted mt-1">Previous Weight: <strong>{{ last_consult.weight_kg }} kg</strong></div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Consultation Form -->
+        <form method="post">
+            {% csrf_token %}
+            <!-- 1. Vitals Card -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-3 bg-white">
+                <h5 class="fw-bold text-primary mb-3"><i class="bi bi-heart-pulse me-2"></i> 1. Patient Vitals</h5>
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-semibold">Weight (kg)</label>
+                        {{ form.weight_kg }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-semibold">Temperature (°C)</label>
+                        {{ form.temperature_c }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-semibold">Heart Rate (BPM)</label>
+                        {{ form.heart_rate_bpm }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Clinical Notes & Diagnosis Card -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-3 bg-white">
+                <h5 class="fw-bold text-primary mb-3"><i class="bi bi-clipboard2-pulse me-2"></i> 2. Clinical Findings & Diagnosis</h5>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Symptoms Reported *</label>
+                        {{ form.symptoms }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Physical Examination Findings</label>
+                        {{ form.physical_examination }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Definitive Diagnosis *</label>
+                        {{ form.diagnosis }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Treatment Administered In-Clinic</label>
+                        {{ form.treatment_administered }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Prescriptions Formset -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-3 bg-white">
+                <h5 class="fw-bold text-primary mb-3"><i class="bi bi-capsule me-2"></i> 3. Home Prescriptions (Rx)</h5>
+                {{ formset.management_form }}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light small">
+                            <tr>
+                                <th>Medicine Name</th>
+                                <th>Dosage</th>
+                                <th>Frequency</th>
+                                <th style="width: 80px;">Days</th>
+                                <th>Instructions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p_form in formset %}
+                            <tr>
+                                <td>{{ p_form.medicine_name }}{{ p_form.id }}</td>
+                                <td>{{ p_form.dosage }}</td>
+                                <td>{{ p_form.frequency }}</td>
+                                <td>{{ p_form.duration_days }}</td>
+                                <td>{{ p_form.instructions }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. Follow-Up -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                <h5 class="fw-bold text-primary mb-3"><i class="bi bi-calendar-check me-2"></i> 4. Follow-Up & Home Advice</h5>
+                <div class="row g-3">
+                    <div class="col-12 col-md-8">
+                        <label class="form-label small fw-semibold">Home Care & Dietary Advice</label>
+                        {{ form.home_care_advice }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-semibold">Follow-Up Date</label>
+                        {{ form.follow_up_date }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid mb-5">
+                <button type="submit" class="btn btn-primary py-3 fw-bold rounded-3 shadow">
+                    <i class="bi bi-check2-circle me-1"></i> Save Consultation & Complete Visit
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

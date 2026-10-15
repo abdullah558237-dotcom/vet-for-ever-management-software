@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                <h4 class="fw-bold text-primary mb-0"><i class="bi bi-person-circle me-2"></i> My Profile</h4>
+                <a href="{% url 'change_password' %}" class="btn btn-outline-warning btn-sm rounded-3">
+                    <i class="bi bi-key me-1"></i> Change Password
+                </a>
+            </div>
+
+            <div class="d-flex align-items-center gap-3 bg-light p-3 rounded-3 mb-4">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-3" style="width: 55px; height: 55px;">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">{{ user.get_full_name|default:user.username }}</h5>
+                    <span class="badge bg-primary">{{ user.get_role_display }}</span>
+                    {% if user.license_number %}<small class="text-muted ms-2">Lic: {{ user.license_number }}</small>{% endif %}
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label class="form-label small fw-semibold">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-semibold">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Email Address</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Phone Number</label>
+                        {{ form.phone_number }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">License Number</label>
+                        {{ form.license_number }}
+                    </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ invoice.invoice_number }} | Invoice Detail{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-primary mb-0"><i class="bi bi-receipt me-2"></i> {{ invoice.invoice_number }}</h4>
+            <div class="d-flex gap-2">
+                <a href="{% url 'invoice_print' invoice.pk %}" target="_blank" class="btn btn-outline-primary btn-sm rounded-3">
+                    <i class="bi bi-printer me-1"></i> Print Receipt
+                </a>
+                <a href="{% url 'invoice_list' %}" class="btn btn-secondary btn-sm rounded-3">Back to Ledger</a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-3">
+            <div class="d-flex justify-content-between pb-3 border-bottom mb-3">
+                <div>
+                    <h5 class="fw-bold mb-1">{{ invoice.patient.name }}</h5>
+                    <div class="text-muted small">Owner: {{ invoice.owner.get_full_name }} &bull; Phone: {{ invoice.owner.phone }}</div>
+                </div>
+                <div class="text-end">
+                    <span class="badge {{ invoice.badge_class }} px-3 py-2 fs-6 rounded-pill mb-1">{{ invoice.get_status_display }}</span><br>
+                    <small class="text-muted">{{ invoice.created_at|date:"F d, Y h:i A" }}</small>
+                </div>
+            </div>
+
+            <table class="table table-bordered mb-4">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Item Description</th>
+                        <th>Category</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-end">Unit Price</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="fw-semibold">{{ item.description }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ item.get_item_type_display }}</span></td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-end">Rs. {{ item.unit_price }}</td>
+                        <td class="text-end fw-bold">Rs. {{ item.total_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="row justify-content-end">
+                <div class="col-12 col-md-5">
+                    <div class="bg-light p-3 rounded-3">
+                        <div class="d-flex justify-content-between py-1 small">
+                            <span>Subtotal:</span><strong>Rs. {{ invoice.subtotal }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 small">
+                            <span>Discount:</span><strong class="text-danger">- Rs. {{ invoice.discount }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-top border-bottom fs-5 fw-bold text-primary">
+                            <span>Total Amount:</span><span>Rs. {{ invoice.total_amount }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 small mt-1">
+                            <span>Amount Paid:</span><strong class="text-success">Rs. {{ invoice.paid_amount }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 small">
+                            <span>Balance Due:</span><strong class="text-danger">Rs. {{ invoice.balance_due }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collect Payment Section if balance remaining -->
+            {% if invoice.balance_due > 0 %}
+            <div class="card border-warning bg-warning-subtle p-3 rounded-3 mt-4">
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-wallet2 me-1"></i> Collect Remaining Balance (Rs. {{ invoice.balance_due }})</h6>
+                <form method="post" class="row g-2 align-items-center">
+                    {% csrf_token %}
+                    <div class="col-12 col-sm-5">
+                        {{ payment_form.additional_payment }}
+                    </div>
+                    <div class="col-12 col-sm-4">
+                        {{ payment_form.payment_method }}
+                    </div>
+                    <div class="col-12 col-sm-3">
+                        <button type="submit" class="btn btn-primary w-100 fw-semibold">Receive</button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

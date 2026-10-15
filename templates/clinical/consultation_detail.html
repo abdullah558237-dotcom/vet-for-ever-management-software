@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Consultation Summary: {{ consultation.patient.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-primary mb-0"><i class="bi bi-file-medical me-2"></i> Consultation Summary</h4>
+            <div class="d-flex gap-2">
+                <a href="{% url 'prescription_print' consultation.pk %}" target="_blank" class="btn btn-outline-primary btn-sm rounded-3">
+                    <i class="bi bi-printer me-1"></i> Print Rx Slip
+                </a>
+                <a href="{% url 'patient_detail' consultation.patient.pk %}" class="btn btn-primary btn-sm rounded-3">
+                    View Patient Profile
+                </a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-3">
+            <div class="row pb-3 border-bottom mb-3">
+                <div class="col-6">
+                    <h5 class="fw-bold mb-1">{{ consultation.patient.name }}</h5>
+                    <div class="text-muted small">Owner: {{ consultation.patient.owner.get_full_name }} ({{ consultation.patient.owner.phone }})</div>
+                </div>
+                <div class="col-6 text-end">
+                    <div class="fw-semibold">Dr. {{ consultation.veterinarian.username }}</div>
+                    <div class="text-muted small">{{ consultation.created_at|date:"F d, Y h:i A" }}</div>
+                </div>
+            </div>
+
+            <!-- Vitals Grid -->
+            <div class="row g-2 text-center bg-light p-3 rounded-3 mb-4">
+                <div class="col-4">
+                    <div class="text-muted small">Weight</div>
+                    <div class="fw-bold fs-5">{{ consultation.weight_kg|default:"-" }} kg</div>
+                </div>
+                <div class="col-4">
+                    <div class="text-muted small">Temperature</div>
+                    <div class="fw-bold fs-5">{{ consultation.temperature_c|default:"-" }} °C</div>
+                </div>
+                <div class="col-4">
+                    <div class="text-muted small">Heart Rate</div>
+                    <div class="fw-bold fs-5">{{ consultation.heart_rate_bpm|default:"-" }} BPM</div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h6 class="fw-bold text-secondary">Diagnosis:</h6>
+                <div class="p-3 bg-light rounded-3 fw-semibold">{{ consultation.diagnosis }}</div>
+            </div>
+
+            <div class="mb-3">
+                <h6 class="fw-bold text-secondary">Symptoms:</h6>
+                <p class="text-muted mb-0">{{ consultation.symptoms }}</p>
+            </div>
+
+            {% if consultation.treatment_administered %}
+            <div class="mb-3">
+                <h6 class="fw-bold text-secondary">In-Clinic Treatment:</h6>
+                <p class="text-muted mb-0">{{ consultation.treatment_administered }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Prescriptions -->
+            <div class="mt-4">
+                <h6 class="fw-bold text-primary"><i class="bi bi-capsule me-1"></i> Prescribed Medications (Rx)</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mt-2">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Dosage</th>
+                                <th>Frequency</th>
+                                <th>Duration</th>
+                                <th>Instructions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rx in prescriptions %}
+                            <tr>
+                                <td class="fw-semibold">{{ rx.medicine_name }}</td>
+                                <td>{{ rx.dosage }}</td>
+                                <td>{{ rx.frequency }}</td>
+                                <td>{{ rx.duration_days }} days</td>
+                                <td class="text-muted small">{{ rx.instructions|default:"-" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center text-muted">No home prescriptions recorded.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if consultation.follow_up_date %}
+            <div class="alert alert-info mt-3 d-flex align-items-center mb-0">
+                <i class="bi bi-calendar2-check fs-4 me-2"></i>
+                <div>Next Follow-Up Date: <strong>{{ consultation.follow_up_date|date:"l, F d, Y" }}</strong></div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

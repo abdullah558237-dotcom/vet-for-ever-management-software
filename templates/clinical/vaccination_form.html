@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Record Vaccine: {{ patient.name }} | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                <h4 class="fw-bold text-primary mb-0"><i class="bi bi-shield-plus me-2"></i> Record Vaccination</h4>
+                <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-outline-secondary btn-sm rounded-3">Cancel</a>
+            </div>
+
+            <div class="alert alert-info py-2 small rounded-3 mb-3">
+                Recording vaccine for: <strong>{{ patient.name }}</strong> ({{ patient.get_species_display }} &bull; {{ patient.breed|default:"Mixed" }})
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Vaccine Name *</label>
+                        {{ form.vaccine_name }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Manufacturer Lot / Batch Number</label>
+                        {{ form.batch_number }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Administered Date *</label>
+                        {{ form.administered_date }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Next Booster Due Date *</label>
+                        {{ form.next_due_date }}
+                        <small class="text-muted">Auto-set to 1 year from today (edit if needed)</small>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Notes / Adverse Reaction Observations</label>
+                        {{ form.notes }}
+                    </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3 shadow-sm">
+                        <i class="bi bi-check-circle me-1"></i> Save Vaccination Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

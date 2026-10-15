@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Live Waiting Queue | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h4 class="fw-bold text-primary mb-0"><i class="bi bi-hourglass-split me-2"></i> Today's Live Waiting Queue</h4>
+        <span class="text-muted small">{{ today|date:"l, F d, Y" }}</span>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary btn-sm rounded-3" data-bs-toggle="modal" data-bs-target="#walkinModal">
+            <i class="bi bi-plus-circle me-1"></i> + Quick Walk-In
+        </button>
+        <a href="{% url 'appointment_create' %}" class="btn btn-outline-primary btn-sm rounded-3">
+            <i class="bi bi-calendar-plus me-1"></i> Book Appointment
+        </a>
+    </div>
+</div>
+
+<!-- Queue Counter Badges -->
+<div class="row g-2 mb-4">
+    <div class="col-4">
+        <div class="card border-0 shadow-sm p-3 text-center bg-white rounded-3">
+            <h4 class="fw-bold mb-0 text-warning">{{ waiting_count }}</h4>
+            <span class="text-muted small">Waiting in Clinic</span>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm p-3 text-center bg-white rounded-3">
+            <h4 class="fw-bold mb-0 text-primary">{{ in_consult_count }}</h4>
+            <span class="text-muted small">In Consultation</span>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm p-3 text-center bg-white rounded-3">
+            <h4 class="fw-bold mb-0 text-success">{{ completed_today }}</h4>
+            <span class="text-muted small">Completed Today</span>
+        </div>
+    </div>
+</div>
+
+<!-- Active Queue List -->
+<div class="card border-0 shadow-sm rounded-4 bg-white">
+    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0 text-dark">Active Queue List</h5>
+        <span class="badge bg-primary-subtle text-primary">{{ queue|length }} in Queue</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+            {% for appt in queue %}
+            <div class="list-group-item p-3 border-0 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-light text-primary border fs-5 fw-bold px-3 py-2 rounded-3">
+                        #{{ appt.token_number|default:"-" }}
+                    </span>
+                    <div>
+                        <h6 class="fw-bold mb-1">
+                            <a href="{% url 'patient_detail' appt.patient.pk %}" class="text-decoration-none text-dark">
+                                {{ appt.patient.name }}
+                            </a>
+                            <span class="text-muted small fw-normal">({{ appt.patient.get_species_display }})</span>
+                        </h6>
+                        <div class="text-muted small">
+                            <i class="bi bi-person me-1"></i> {{ appt.patient.owner.get_full_name }} &bull;
+                            <i class="bi bi-telephone me-1"></i> {{ appt.patient.owner.phone }}
+                        </div>
+                        <div class="small text-danger-emphasis mt-1">
+                            <i class="bi bi-clipboard2-pulse me-1"></i> {{ appt.reason }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge {{ appt.badge_class }} px-2 py-1 rounded-pill small">
+                        {{ appt.get_status_display }}
+                    </span>
+
+                    {% if appt.status == 'WAITING' %}
+                        <a href="{% url 'update_appointment_status' appt.pk 'IN_CONSULTATION' %}" class="btn btn-primary btn-sm rounded-pill px-3">
+                            <i class="bi bi-megaphone me-1"></i> Call In
+                        </a>
+                    {% elif appt.status == 'IN_CONSULTATION' %}
+                        <a href="{% url 'update_appointment_status' appt.pk 'COMPLETED' %}" class="btn btn-success btn-sm rounded-pill px-3">
+                            <i class="bi bi-check2-circle me-1"></i> Complete
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'update_appointment_status' appt.pk 'CANCELLED' %}" class="btn btn-outline-danger btn-sm rounded-circle" title="Cancel">
+                        <i class="bi bi-x"></i>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-emoji-smile fs-1"></i>
+                <h5 class="mt-2">No patients waiting right now!</h5>
+                <p class="small">Click "+ Quick Walk-In" to check in an arrival.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Walk-In Modal -->
+<div class="modal fade" id="walkinModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary"><i class="bi bi-plus-circle me-1"></i> Walk-In Patient Arrival</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'quick_walkin' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Select Patient (Pet) *</label>
+                        {{ walkin_form.patient }}
+                        <small class="text-muted"><a href="{% url 'patient_create' %}">+ Register New Pet</a></small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Assign Veterinarian (Optional)</label>
+                        {{ walkin_form.veterinarian }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Symptoms / Reason *</label>
+                        {{ walkin_form.reason }}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-3">
+                        Issue Daily Token & Add to Queue
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

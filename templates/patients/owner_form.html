@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Register Owner | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <h4 class="fw-bold text-primary mb-3"><i class="bi bi-person-plus-fill me-2"></i> Register Pet Owner</h4>
+            <p class="text-muted small">Enter owner details first. You will be redirected to register their pet right after.</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label class="form-label small fw-semibold">First Name *</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-semibold">Last Name *</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Phone Number *</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Email Address</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Residential Address</label>
+                        {{ form.address }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Emergency Contact</label>
+                        {{ form.emergency_contact }}
+                    </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3">
+                        Save Owner & Proceed to Pet Registration
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

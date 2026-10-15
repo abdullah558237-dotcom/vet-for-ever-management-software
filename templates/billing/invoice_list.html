@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Billing & Invoices | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h4 class="fw-bold text-primary mb-0"><i class="bi bi-receipt me-2"></i> Billing & Invoices Ledger</h4>
+        <span class="text-muted small">Financial records, collections, and pending balances</span>
+    </div>
+    <a href="{% url 'patient_list' %}" class="btn btn-primary btn-sm rounded-3">
+        <i class="bi bi-plus-circle me-1"></i> + New Invoice
+    </a>
+</div>
+
+<!-- Revenue & Outstanding Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-6">
+        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white metric-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">Total Revenue (Collected)</div>
+                    <h3 class="fw-bold mb-0 text-success">Rs. {{ total_revenue|floatformat:2 }}</h3>
+                </div>
+                <div class="bg-success-subtle text-success p-3 rounded-3 fs-3">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-6">
+        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white metric-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">Total Outstanding Balance</div>
+                    <h3 class="fw-bold mb-0 text-danger">Rs. {{ total_outstanding|floatformat:2 }}</h3>
+                </div>
+                <div class="bg-danger-subtle text-danger p-3 rounded-3 fs-3">
+                    <i class="bi bi-hourglass-bottom"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="card border-0 shadow-sm rounded-3 p-3 mb-4 bg-white">
+    <form method="get" class="row g-2">
+        <div class="col-12 col-md-8">
+            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by invoice number, pet name, or owner phone...">
+        </div>
+        <div class="col-8 col-md-3">
+            <select name="status" class="form-select">
+                <option value="">All Statuses</option>
+                {% for code, label in status_choices %}
+                    <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-4 col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- Invoices Table -->
+<div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Date</th>
+                    <th>Patient (Owner)</th>
+                    <th>Total</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inv in invoices %}
+                <tr>
+                    <td class="fw-bold text-primary">
+                        <a href="{% url 'invoice_detail' inv.pk %}" class="text-decoration-none">{{ inv.invoice_number }}</a>
+                    </td>
+                    <td>{{ inv.created_at|date:"d M, Y" }}</td>
+                    <td>
+                        <span class="fw-semibold">{{ inv.patient.name }}</span><br>
+                        <small class="text-muted">{{ inv.owner.get_full_name }} ({{ inv.owner.phone }})</small>
+                    </td>
+                    <td class="fw-bold">Rs. {{ inv.total_amount }}</td>
+                    <td class="text-success">Rs. {{ inv.paid_amount }}</td>
+                    <td class="text-danger fw-semibold">Rs. {{ inv.balance_due }}</td>
+                    <td><span class="badge {{ inv.badge_class }}">{{ inv.get_status_display }}</span></td>
+                    <td>
+                        <a href="{% url 'invoice_detail' inv.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">View</a>
+                        <a href="{% url 'invoice_print' inv.pk %}" target="_blank" class="btn btn-light btn-sm rounded-circle"><i class="bi bi-printer"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center py-4 text-muted">No invoices recorded yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

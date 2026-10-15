@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Pharmacy & Inventory | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h4 class="fw-bold text-primary mb-0"><i class="bi bi-capsule me-2"></i> Pharmacy & Inventory</h4>
+        <span class="text-muted small">Medication stock, thresholds, and expiry alerts</span>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'stock_movements' %}" class="btn btn-outline-secondary btn-sm rounded-3">
+            <i class="bi bi-clock-history me-1"></i> Audit Ledger
+        </a>
+        <a href="{% url 'medicine_create' %}" class="btn btn-primary btn-sm rounded-3">
+            <i class="bi bi-plus-circle me-1"></i> + Add Medicine
+        </a>
+    </div>
+</div>
+
+<!-- Stock KPI Badges -->
+<div class="row g-3 mb-4">
+    <div class="col-4">
+        <a href="?tab=all" class="text-decoration-none">
+            <div class="card border-0 shadow-sm p-3 text-center bg-white rounded-4 {% if tab == 'all' %}border border-primary border-2{% endif %}">
+                <h4 class="fw-bold mb-0 text-primary">{{ total_items_count }}</h4>
+                <span class="text-muted small">All Medications</span>
+            </div>
+        </a>
+    </div>
+    <div class="col-4">
+        <a href="?tab=low_stock" class="text-decoration-none">
+            <div class="card border-0 shadow-sm p-3 text-center bg-white rounded-4 {% if tab == 'low_stock' %}border border-warning border-2{% endif %}">
+                <h4 class="fw-bold mb-0 text-warning">{{ low_stock_count }}</h4>
+                <span class="text-muted small">Low Stock Alerts</span>
+            </div>
+        </a>
+    </div>
+    <div class="col-4">
+        <a href="?tab=expiring" class="text-decoration-none">
+            <div class="card border-0 shadow-sm p-3 text-center bg-white rounded-4 {% if tab == 'expiring' %}border border-danger border-2{% endif %}">
+                <h4 class="fw-bold mb-0 text-danger">{{ expiring_count }}</h4>
+                <span class="text-muted small">Expiring Soon</span>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="card border-0 shadow-sm rounded-3 p-3 mb-4 bg-white">
+    <form method="get" class="row g-2">
+        <input type="hidden" name="tab" value="{{ tab }}">
+        <div class="col-12 col-md-8">
+            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by brand name, salt, batch, or supplier...">
+        </div>
+        <div class="col-8 col-md-3">
+            <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                {% for code, label in categories %}
+                    <option value="{{ code }}" {% if category_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-4 col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- Inventory Table -->
+<div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+                <tr>
+                    <th>Medication Name</th>
+                    <th>Category</th>
+                    <th>Stock Level</th>
+                    <th>Price (Rs.)</th>
+                    <th>Expiry Date</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for med in medicines %}
+                <tr>
+                    <td>
+                        <div class="fw-bold text-dark">{{ med.name }}</div>
+                        <small class="text-muted">{{ med.generic_name|default:"-" }} &bull; Batch: {{ med.batch_number|default:"N/A" }}</small>
+                    </td>
+                    <td><span class="badge bg-light text-dark border">{{ med.get_category_display }}</span></td>
+                    <td>
+                        <span class="badge {{ med.stock_status.badge }} px-2 py-1">{{ med.stock_status.label }}</span>
+                        <div class="small text-muted">Min: {{ med.reorder_threshold }}</div>
+                    </td>
+                    <td>
+                        <div class="fw-semibold">Sell: Rs. {{ med.selling_price }}</div>
+                        <small class="text-muted">Cost: Rs. {{ med.cost_price }}</small>
+                    </td>
+                    <td>
+                        <span class="badge {{ med.expiry_status.badge }}">{{ med.expiry_status.label }}</span>
+                    </td>
+                    <td class="text-end">
+                        <button class="btn btn-outline-success btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#restockModal{{ med.pk }}">
+                            <i class="bi bi-plus-lg me-1"></i> Restock
+                        </button>
+                        <a href="{% url 'medicine_update' med.pk %}" class="btn btn-light btn-sm rounded-circle" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </td>
+                </tr>
+
+                <!-- 1-Click Quick Restock Modal for each item -->
+                <div class="modal fade text-start" id="restockModal{{ med.pk }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-4 border-0">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title fw-bold text-success"><i class="bi bi-plus-circle me-1"></i> Restock {{ med.name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted small">Current Stock: <strong>{{ med.quantity_in_stock }} {{ med.get_unit_type_display }}</strong></p>
+                                <form method="post" action="{% url 'medicine_restock' med.pk %}">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">Quantity to Add *</label>
+                                        <input type="number" name="quantity_to_add" class="form-control" value="10" min="1" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">New Batch / Lot (Optional)</label>
+                                        <input type="text" name="new_batch_number" class="form-control" placeholder="{{ med.batch_number }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">New Expiry Date (Optional)</label>
+                                        <input type="date" name="new_expiry_date" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">Notes / Invoice #</label>
+                                        <input type="text" name="notes" class="form-control" placeholder="Purchase invoice remarks">
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100 py-2 fw-semibold rounded-3">
+                                        Confirm Stock Addition
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <tr><td colspan="6" class="text-center py-4 text-muted">No medicines found. Click "+ Add Medicine" to get started.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

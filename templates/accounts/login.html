@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Login - VetCare Pro{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-12 col-sm-8 col-md-5 col-lg-4">
+    <div class="text-center mb-4">
+      <i class="bi bi-heart-pulse display-3 text-success"></i>
+      <h1 class="h3 mt-2">VetCare Pro</h1>
+    </div>
+    <form method="post" class="card card-body shadow-sm">
+      {% csrf_token %}
+      {% if form.errors %}
+        <div class="alert alert-danger">Wrong username or password.</div>
+      {% endif %}
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        {{ form.username }}
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        {{ form.password }}
+      </div>
+      <button class="btn btn-success btn-lg w-100" type="submit">Login</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

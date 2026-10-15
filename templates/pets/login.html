@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Login | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+        <div class="card border-0 shadow-lg rounded-4 p-4 bg-white">
+            <div class="text-center mb-4">
+                <div class="bg-primary-subtle text-primary d-inline-flex p-3 rounded-circle mb-2">
+                    <i class="bi bi-hospital fs-1"></i>
+                </div>
+                <h4 class="fw-bold text-primary mb-1">VetCare Pro</h4>
+                <p class="text-muted small">Sign in to access clinic portal</p>
+            </div>
+
+            {% if form.errors %}
+                <div class="alert alert-danger py-2 small rounded-3" role="alert">
+                    <i class="bi bi-exclamation-circle me-1"></i> Invalid username or password.
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                        <input type="text" name="username" class="form-control bg-light" placeholder="Enter username" required autofocus>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                        <input type="password" name="password" class="form-control bg-light" placeholder="Enter password" required>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3 shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

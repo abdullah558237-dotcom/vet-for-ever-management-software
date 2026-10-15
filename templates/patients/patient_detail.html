@@ -1,0 +1,94 @@
+    <!-- Right: Clinical Records (EMR History) -->
+    <div class="col-12 col-md-8">
+        {% if patient.allergies_notes %}
+        <div class="alert alert-danger d-flex align-items-center rounded-3 shadow-sm mb-3">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+            <div>
+                <strong>Medical Alert / Allergies:</strong><br>
+                {{ patient.allergies_notes }}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-file-medical me-2"></i> Chronological Medical History (EMR)</h5>
+                <a href="{% url 'consultation_start' patient.pk %}" class="btn btn-primary btn-sm rounded-3">
+                    <i class="bi bi-plus-circle me-1"></i> + New Examination
+                </a>
+            </div>
+
+            <!-- Timeline of past consultations -->
+            <div class="list-group list-group-flush mt-3">
+                {% for consult in patient.consultations.all %}
+                <div class="list-group-item px-0 py-3 border-0 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-1">
+                        <span class="badge bg-primary-subtle text-primary fw-semibold">{{ consult.created_at|date:"d M, Y - h:i A" }}</span>
+                        <span class="small text-muted">Dr. {{ consult.veterinarian.username }} &bull; Weight: <strong>{{ consult.weight_kg|default:"-" }} kg</strong></span>
+                    </div>
+                    <h6 class="fw-bold text-dark mt-2 mb-1">Diagnosis: {{ consult.diagnosis }}</h6>
+                    <p class="text-muted small mb-2">Symptoms: {{ consult.symptoms|truncatechars:120 }}</p>
+
+                    {% if consult.prescriptions.exists %}
+                    <div class="small bg-light p-2 rounded-2 mb-2">
+                        <span class="fw-bold text-secondary">Prescriptions ({{ consult.prescriptions.count }}):</span>
+                        {% for rx in consult.prescriptions.all %}
+                            <span class="badge bg-white text-dark border me-1">{{ rx.medicine_name }} ({{ rx.dosage }})</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'consultation_detail' consult.pk %}" class="btn btn-outline-primary btn-sm py-0">View Details</a>
+                        <a href="{% url 'prescription_print' consult.pk %}" target="_blank" class="btn btn-light btn-sm py-0"><i class="bi bi-printer"></i> Print Rx</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-4 bg-light rounded-3 text-center text-muted">
+                    <i class="bi bi-clock-history fs-2"></i>
+                    <p class="mb-0 mt-2 small">No previous medical visits recorded for this patient.</p>
+                    <a href="{% url 'consultation_start' patient.pk %}" class="btn btn-outline-primary btn-sm mt-3">Start First Examination</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+        <!-- Vaccination Passport Card -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mt-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h5 class="fw-bold mb-0 text-success"><i class="bi bi-shield-check me-2"></i> Vaccination & Booster History</h5>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'vaccine_passport_print' patient.pk %}" target="_blank" class="btn btn-outline-success btn-sm rounded-3">
+                        <i class="bi bi-printer me-1"></i> Print Passport
+                    </a>
+                    <a href="{% url 'vaccine_create' patient.pk %}" class="btn btn-success btn-sm rounded-3">
+                        <i class="bi bi-plus-circle me-1"></i> + Record Vaccine
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Vaccine</th>
+                            <th>Given Date</th>
+                            <th>Next Due Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vac in patient.vaccinations.all %}
+                        <tr>
+                            <td class="fw-semibold">{{ vac.get_vaccine_name_display }}</td>
+                            <td>{{ vac.administered_date|date:"d M, Y" }}</td>
+                            <td class="fw-semibold">{{ vac.next_due_date|date:"d M, Y" }}</td>
+                            <td><span class="badge {{ vac.status_info.badge }}">{{ vac.status_info.label }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center py-3 text-muted">No vaccinations recorded yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>

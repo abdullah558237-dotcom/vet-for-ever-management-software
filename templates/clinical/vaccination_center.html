@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Vaccination & Reminder Center | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h4 class="fw-bold text-primary mb-0"><i class="bi bi-shield-plus me-2"></i> Vaccination & Booster Hub</h4>
+        <span class="text-muted small">Preventive care tracking & client recall list</span>
+    </div>
+    <a href="{% url 'patient_list' %}" class="btn btn-primary btn-sm rounded-3">
+        <i class="bi bi-plus-circle me-1"></i> + Record Vaccine
+    </a>
+</div>
+
+<!-- Alert Counters -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4">
+        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white metric-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">Overdue Boosters</div>
+                    <h3 class="fw-bold mb-0 text-danger">{{ overdue_count }}</h3>
+                </div>
+                <div class="bg-danger-subtle text-danger p-3 rounded-3 fs-3">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white metric-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">Due in Next 30 Days</div>
+                    <h3 class="fw-bold mb-0 text-warning">{{ upcoming_count }}</h3>
+                </div>
+                <div class="bg-warning-subtle text-warning p-3 rounded-3 fs-3">
+                    <i class="bi bi-bell-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white metric-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">Given This Fortnight</div>
+                    <h3 class="fw-bold mb-0 text-success">{{ recent_administered.count }}</h3>
+                </div>
+                <div class="bg-success-subtle text-success p-3 rounded-3 fs-3">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Overdue Section -->
+<div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+    <h5 class="fw-bold text-danger mb-3"><i class="bi bi-exclamation-circle-fill me-2"></i> Overdue Boosters (Recall Needed)</h5>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+                <tr>
+                    <th>Patient</th>
+                    <th>Vaccine</th>
+                    <th>Owner</th>
+                    <th>Phone</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vac in overdue_list %}
+                <tr>
+                    <td class="fw-bold">
+                        <a href="{% url 'patient_detail' vac.patient.pk %}" class="text-decoration-none text-dark">{{ vac.patient.name }}</a>
+                    </td>
+                    <td>{{ vac.get_vaccine_name_display }}</td>
+                    <td>{{ vac.patient.owner.get_full_name }}</td>
+                    <td><a href="tel:{{ vac.patient.owner.phone }}" class="text-decoration-none">{{ vac.patient.owner.phone }}</a></td>
+                    <td class="text-danger fw-semibold">{{ vac.next_due_date|date:"d M, Y" }}</td>
+                    <td><span class="badge {{ vac.status_info.badge }}">{{ vac.status_info.label }}</span></td>
+                    <td>
+                        <a href="{% url 'vaccine_create' vac.patient.pk %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Renew</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center py-3 text-muted">No overdue vaccinations! Great job.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Upcoming Section -->
+<div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+    <h5 class="fw-bold text-warning-emphasis mb-3"><i class="bi bi-calendar-event-fill me-2"></i> Upcoming Boosters (Next 30 Days)</h5>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+                <tr>
+                    <th>Patient</th>
+                    <th>Vaccine</th>
+                    <th>Owner Contact</th>
+                    <th>Next Due Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vac in upcoming_list %}
+                <tr>
+                    <td class="fw-bold">
+                        <a href="{% url 'patient_detail' vac.patient.pk %}" class="text-decoration-none text-dark">{{ vac.patient.name }}</a>
+                    </td>
+                    <td>{{ vac.get_vaccine_name_display }}</td>
+                    <td>{{ vac.patient.owner.get_full_name }} ({{ vac.patient.owner.phone }})</td>
+                    <td class="fw-semibold text-warning-emphasis">{{ vac.next_due_date|date:"d M, Y" }}</td>
+                    <td>
+                        <a href="{% url 'vaccine_create' vac.patient.pk %}" class="btn btn-light btn-sm rounded-3">Record Dose</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center py-3 text-muted">No upcoming booster shots due in the next 30 days.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                <h4 class="fw-bold text-primary mb-0"><i class="bi bi-heart-pulse-fill me-2"></i> {{ title }}</h4>
+                <a href="{% url 'patient_list' %}" class="btn btn-outline-secondary btn-sm rounded-3">Cancel</a>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Owner <span class="text-danger">*</span></label>
+                        {{ form.owner }}
+                        <small class="text-muted"><a href="{% url 'owner_create' %}">+ Add New Owner</a></small>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Pet Name <span class="text-danger">*</span></label>
+                        {{ form.name }}
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <label class="form-label small fw-semibold">Species <span class="text-danger">*</span></label>
+                        {{ form.species }}
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <label class="form-label small fw-semibold">Breed</label>
+                        {{ form.breed }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-semibold">Gender <span class="text-danger">*</span></label>
+                        {{ form.gender }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Date of Birth</label>
+                        {{ form.date_of_birth }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Microchip ID (Optional)</label>
+                        {{ form.microchip_number }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Color / Markings</label>
+                        {{ form.color_markings }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Pet Photo</label>
+                        {{ form.photo }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Medical Alert / Drug Allergies</label>
+                        {{ form.allergies_notes }}
+                    </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3">
+                        <i class="bi bi-check-circle me-1"></i> Save Patient Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointments Schedule | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h4 class="fw-bold text-primary mb-0"><i class="bi bi-calendar-week me-2"></i> Clinic Schedule</h4>
+    <a href="{% url 'appointment_create' %}" class="btn btn-primary btn-sm rounded-3">
+        <i class="bi bi-plus-circle me-1"></i> + Book Appointment
+    </a>
+</div>
+
+<!-- Date Filter Form -->
+<div class="card border-0 shadow-sm rounded-3 p-3 mb-4 bg-white">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-auto"><label class="small fw-semibold">Select Date:</label></div>
+        <div class="col-auto">
+            <input type="date" name="date" value="{{ selected_date }}" class="form-control form-control-sm">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary btn-sm">Filter</button>
+        </div>
+    </form>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Token/Time</th>
+                    <th>Patient</th>
+                    <th>Owner</th>
+                    <th>Type</th>
+                    <th>Doctor</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appt in appointments %}
+                <tr>
+                    <td class="fw-bold text-primary">
+                        {% if appt.token_number %}#{{ appt.token_number }}{% else %}{{ appt.scheduled_time|default:"TBD" }}{% endif %}
+                    </td>
+                    <td class="fw-semibold">{{ appt.patient.name }}</td>
+                    <td class="text-muted small">{{ appt.patient.owner.get_full_name }}</td>
+                    <td><span class="badge bg-light text-dark border">{{ appt.get_visit_type_display }}</span></td>
+                    <td>{{ appt.veterinarian.username|default:"Any Vet" }}</td>
+                    <td><span class="badge {{ appt.badge_class }}">{{ appt.get_status_display }}</span></td>
+                    <td>
+                        <a href="{% url 'update_appointment_status' appt.pk 'WAITING' %}" class="btn btn-sm btn-outline-warning" title="Check-In to Waiting Queue">
+                            Check In
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">No appointments found for this date.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Appointment | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <h4 class="fw-bold text-primary mb-3"><i class="bi bi-calendar-plus me-2"></i> Book Scheduled Appointment</h4>
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Select Patient *</label>
+                        {{ form.patient }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Date *</label>
+                        {{ form.scheduled_date }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Time</label>
+                        {{ form.scheduled_time }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Visit Type</label>
+                        {{ form.visit_type }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold">Doctor (Vet)</label>
+                        {{ form.veterinarian }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Reason for Visit *</label>
+                        {{ form.reason }}
+                    </div>
+                </div>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary py-2 fw-semibold rounded-3">Confirm Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

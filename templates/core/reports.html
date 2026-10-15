@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Clinic Reports & Analytics | VetCare Pro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h4 class="fw-bold text-primary mb-0"><i class="bi bi-bar-chart-fill me-2"></i> Executive Clinic Analytics</h4>
+        <span class="text-muted small">Financial performance, patient demographics, and department metrics</span>
+    </div>
+    <a href="{% url 'export_invoices_csv' %}" class="btn btn-outline-success btn-sm rounded-3">
+        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Financials (CSV)
+    </a>
+</div>
+
+<!-- Financial KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white metric-card">
+            <div class="text-muted small fw-semibold">Total Revenue (All Time)</div>
+            <h3 class="fw-bold mb-0 text-success">Rs. {{ total_revenue|floatformat:0 }}</h3>
+            <small class="text-muted">{{ total_invoices }} invoices processed</small>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white metric-card">
+            <div class="text-muted small fw-semibold">Revenue This Month</div>
+            <h3 class="fw-bold mb-0 text-primary">Rs. {{ monthly_revenue|floatformat:0 }}</h3>
+            <small class="text-muted">Current calendar month</small>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white metric-card">
+            <div class="text-muted small fw-semibold">Outstanding Balances</div>
+            <h3 class="fw-bold mb-0 text-danger">Rs. {{ outstanding_balance|floatformat:0 }}</h3>
+            <small class="text-danger">Uncollected receivables</small>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white metric-card">
+            <div class="text-muted small fw-semibold">Consultations This Month</div>
+            <h3 class="fw-bold mb-0 text-info">{{ monthly_consultations }}</h3>
+            <small class="text-muted">{{ total_consultations }} all-time</small>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Service Category Revenue Breakdown -->
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-pie-chart-fill me-2 text-primary"></i> Revenue by Department</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Department / Category</th>
+                            <th>Items Sold</th>
+                            <th class="text-end">Revenue Generated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in category_revenue %}
+                        <tr>
+                            <td class="fw-semibold">{{ cat.item_type }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ cat.count }}</span></td>
+                            <td class="text-end fw-bold text-success">Rs. {{ cat.total_sales|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" class="text-center py-3 text-muted">No categorized sales data yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Species Distribution Breakdown -->
+    <div class="col-12 col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-heart-pulse-fill me-2 text-danger"></i> Patient Demographics</h5>
+            <p class="text-muted small">Registered animal species distribution:</p>
+            <div class="list-group list-group-flush">
+                {% for sp in species_breakdown %}
+                <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center border-0 border-bottom">
+                    <span class="fw-semibold">{{ sp.species }}</span>
+                    <span class="badge bg-primary px-3 py-2 rounded-pill">{{ sp.total }} pets</span>
+                </div>
+                {% empty %}
+                <div class="text-center py-3 text-muted">No registered pets yet.</div>
+                {% endfor %}
+            </div>
+            <div class="mt-4 pt-3 border-top text-center text-muted small">
+                Total Patients in Database: <strong>{{ total_patients }}</strong>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
