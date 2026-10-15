@@ -1,18 +1,10 @@
 venv/
 .venv/
-pycache/
+__pycache__/
 *.py[cod]
 .env
 db.sqlite3
+*.sqlite3
 backups/
 .idea/
 staticfiles/
-# Local settings and backups
-.idea/
-backups/
-db.sqlite3
-*.sqlite3
-venv/
-.venv/
-.env
-__pycache__/
